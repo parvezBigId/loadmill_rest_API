@@ -5,7 +5,7 @@ import serveIndex from "serve-index";
 import fileRoutes from "./routes/files.js";
 
 const app = express();
-const PORT = 9000;
+const PORT = 30899;
 
 app.use(bodyParser.json());
 

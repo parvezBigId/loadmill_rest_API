@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 let files = [];
 
 export const readFS = (req, res) => {
-    const sourceDir = path.join(__dirname, ".." , "Remediation")
+    const sourceDir = path.join("/home/smbtest" , "Remediation")
     fs.readdir(sourceDir, (err, files) => {if (!err) {res.json(files);}else{res.json("Error Reading Dir")}});
     res.end;
 };
