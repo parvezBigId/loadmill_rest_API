@@ -32,8 +32,16 @@ export const cloneFS = (req, res) => {
     const sourceDump = "/home/Remediation"
     const smbSourcePath = path.join(targetDirectory)
     const smbDestinationPath = "/home/smbtest/public"
+       
+        //delete pre-existing directories
+    //child.exec('rm -rf /home/smbtest/', (error, stdout, stderr) => {
+      //     if (error) {
+        //           console.error(`error: ${error.message}`);
+          //         return;
+           //}
+   // });
 
-    //Create SourceSMB directory
+	//Create SourceSMB directory
     fs.mkdirSync(smbSourcePath, {recursive: true}, err => {
         if(!err) {
             console.log("Created");
@@ -41,11 +49,19 @@ export const cloneFS = (req, res) => {
     });
 
       //Create Destination share with name public
-    fs.mkdirSync(smbDestinationPath, {recursive: true}, err => {
-        if(!err) {
-            console.log("Created");
-        }
-    });
+    //fs.mkdirSync(smbDestinationPath, {recursive: true}, err => {
+    //    if(!err) {
+    //        console.log("Created");
+    //    }
+    //});
+
+      //Update permissions to 777 for all directories since the data cannot be moved otherwise
+    //child.exec('chmod 777 -R /home/smbtest/', (error, stdout, stderr) => {
+//	   if (error) {
+//		   console.error(`error: ${error.message}`);
+//		   return;
+//	   }
+//    }); 
 
       //Copy content from source dump to smb source share
     fs.cp(sourceDump, smbSourcePath, {recursive: true}, err => {
@@ -73,8 +89,13 @@ export const fileExists = (req, res) => {
 };
 
 export const deleteDir = (req, res) => {
-    const deleteDirPath = req.body.dirName;
-    fs.rmdirSync(deleteDirPath, {recursive: true});
+    child.exec(`sudo chmod 777 -R ${req.body.dirName}`, (error, stdout, stderr) => {
+           if (error) {
+                   console.error(`error: ${error.message}`);
+                   return;
+           }
+    });
+    fs.rmdirSync(`${req.body.dirName}`, {recursive: true});
     res.json({"deleted": req.body.dirName});
     console.log(`directory with name ${req.body.dirName} has been deleted`);
     res.end;
@@ -85,7 +106,7 @@ export const updateFile =  (req,res) => {
     file.filename = req.body.filename;
     file.name = req.body.name;
     console.log(`filename has been updated to ${req.body.filename}. Name has been updated to ${req.body.name}`)
-};
+}; 
 export const readFile = (req,res) => {
 	const filePath = req.body.filePath;
 	fs.readFile(filePath, 'utf8', function (err, data) {
@@ -106,11 +127,11 @@ export const syncTime =  (req,res) => {
 	//child.exec('date -u +"%Y-%m-%dT%H:%M:%SZ"' , (error, stdout, stderr)=> {
 
 	const dateToCron = (date) => {
-        const seconds = date.getSeconds();
-        const minutes = date.getMinutes();
-        const hours = date.getHours();
-        //res.json({"syncTime":`${seconds} ${minutes} ${hours} * * *`})
-        return `${seconds} ${minutes} ${hours} * * *`;
+    		const seconds = date.getSeconds();
+    		const minutes = date.getMinutes();
+    		const hours = date.getHours();
+		//res.json({"syncTime":`${seconds} ${minutes} ${hours} * * *`})
+    		return `${seconds} ${minutes} ${hours} * * *`;
 	};
 	const dateText = syncDate.toString();
 	const dateBeforeCron = new Date(dateText);
